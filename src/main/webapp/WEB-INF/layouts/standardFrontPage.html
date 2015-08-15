@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org"
+	xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Admin | Dashboard</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+
+</head>
+<body class="skin-blue sidebar-mini">
+	<div class="wrapper">
+		<header class="main-header fixed">
+			<a th:replace="/layouts/fragments/logo.html :: logo">LOGO</a>
+			<nav th:replace="/layouts/fragments/header.html :: header">HEADER</nav>
+		</header>
+
+		<aside class="main-sidebar">
+			<section th:replace="/layouts/fragments/sideMenu.html :: side-menu">SIDE MENU</section>
+		</aside>
+		<div class="content-wrapper" tiles:include="body">BODY</div>
+
+		<footer th:replace="/layouts/fragments/footer.html :: footer">HEADER</footer>
+	</div>
+</body>
+</html>

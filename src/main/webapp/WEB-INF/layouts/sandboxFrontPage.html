@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org"
+	xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<link rel="stylesheet" type="text/css" th:href="@{'/css/bootstrap.css'}"/>
+<link rel="stylesheet" type="text/css" th:href="@{'/css/AdminLTE.css'}"/>
+<link rel="stylesheet" type="text/css" th:href="@{'/css/font-awesome.css'}"/>
+<link rel="stylesheet" type="text/css" th:href="@{'/css/nanoscroller.css'}"/>
+<link rel="stylesheet" type="text/css" th:href="@{'/css/hover.css'}"/>
+<link rel="stylesheet" type="text/css" th:href="@{'/css/main.css'}"/>
+
+<script type="text/javascript" th:src="@{'/js/jquery-1.11.3.min.js'}"></script>
+<script type="text/javascript" th:src="@{'/js/jquery-ui.js'}"></script>
+<script type="text/javascript" th:src="@{'/js/bootstrap.js'}"></script>
+<script type="text/javascript" th:src="@{'/js/bootstrap-switch.js'}"></script>
+<script type="text/javascript" th:src="@{'/js/ejs_production.js'}"></script>
+<script type="text/javascript" th:src="@{'/js/jquery.nanoscroller.js'}"></script>
+<script type="text/javascript" th:src="@{'/plugin/tinymce/tinymce.min.js'}"></script>
+<script type="text/javascript" th:src="@{'/js/function-sandbox.js'}"></script>
+</head>
+<body>
+	<div th:replace="/layouts/fragments/header.html :: header">HEADER</div>
+
+	<div class="content-wrapper" tiles:include="body">BODY</div>
+	
+	<div th:replace="/layouts/fragments/busyIndicator.html :: busyIndicator">BUSY INDICATOR</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+        "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN"
+        "http://tiles.apache.org/dtds/tiles-config_2_1.dtd">
+
+<tiles-definitions>
+
+	<definition name="sandbox" extends="sandboxPageLayout" templateType="thymeleaf">
+        <put-attribute name="body" value="/sandbox.html :: content" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="form" extends="formPageLayout" templateType="thymeleaf">
+        <put-attribute name="body" value="/form.html :: content" type="thymeleaf"/>
+    </definition>
+
+    <!-- <definition name="*" extends="frontPageLayout" templateType="thymeleaf">
+        <put-attribute name="body" value="/{1}.html :: content" type="thymeleaf"/>
+    </definition>
+    
+    <definition name="sandbox" extends="simplePageLayout" templateType="thymeleaf">
+        <put-attribute name="body" value="/sandbox.html :: content" type="thymeleaf"/>
+    </definition> -->
+    
+</tiles-definitions>

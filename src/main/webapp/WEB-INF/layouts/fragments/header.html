@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:tiles="http://www.thymeleaf.org"
+	xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
+<head>
+
+</head>
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top" th:fragment="header">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">
+        <img alt="Brand"/>
+      </a>
+    </div>
+    <form class="navbar-form navbar-center" role="search">
+        <div class="input-group" style="margin: 7px auto">
+					<input type="text" name="q" class="form-control" style="width:800px;" placeholder="Search..."/>
+					 <span class="input-group-btn">
+						<button type="submit" name="search" id="search-btn" class="btn btn-flat">
+							<i class="fa fa-search"></i>
+						</button>
+					</span>
+				</div>	
+      </form>
+  </div>
+</nav>
+</body>
+</html>

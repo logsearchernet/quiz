@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:tiles="http://www.thymeleaf.org"
+      xmlns="http://www.w3.org/1999/xhtml"
+      lang="en">
+
+<head>
+
+</head>
+<body tiles:fragment="content">
+<div><a th:href="'sandbox/new'">New</a></div>
+<table class="table">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>Name</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tr th:each="f, iStat: ${formList}">
+		<td><div th:text="${iStat.count}"></div></td>
+		<td><div th:text="${f.setup.title}"></div></td>
+		<td>
+			<div><a th:href="'sandbox/'+${f.formid}">Edit</a></div>
+			<div><a th:href="'remove/'+${f.formid}">Remove</a></div>
+			<div><a th:href="'form/'+${f.formid}">Form</a></div>
+		</td>
+	</tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,83 @@
+					
+					<li itemsn="<%=itemsn%>" id="<%=itemsn%>" class="question">
+						<div class="question-box">
+						<div class="form-group">
+							<label for="question"><%=count%>. <%=question%></label>
+							<%
+							if (img != '') {
+							%>
+							<div class="thumbnail" style="position:relative;">
+								<img src="<%=img%>" width="100%"/>
+								<%
+								if (edit) {
+								%>
+								<div class="hide" style="position:absolute;right:0; margin-top:-15px;">
+									<button type="button" class="btn btn-default action-remove-item-img"><i class="fa fa-close fa-lg"></i> Remove</button>
+								</div>	
+								<%
+								} // end if edit
+								%>
+							</div>
+							<%
+							} // end if
+							%>
+							
+							
+							
+							<!-- 2 COL -->
+							<table border="0" width="100%">
+							
+							<%
+							for (var i=0; parts!=null && i<parts.length; i++) {
+                                var charNum = 65;
+							%>
+							<%
+							if (i%col==0 && i!=0) {
+							%>
+								<tr>
+							<%
+							} // end if
+							%>
+								<td width="<%=100/col%>%" valign="top" style="padding:5px;">
+								<input type="<%=(type=='truefalse')?'radio':type%>" class="answer-input" id="<%=parts[i].partsn%>" value="<%=parts[i].partsn%>" partsn="<%=parts[i].partsn%>" itemsn="<%=itemsn%>" <%=(parts[i].ans == true)?'checked="checked"':''%>/> 
+								<%=String.fromCharCode(charNum+i)%>. <%=parts[i].value%>
+								
+								<%
+								if (parts[i].img != '') {
+								%>
+								<div class="thumbnail" style="position:relative;">
+									<img class="thumbnail-part" src="<%=parts[i].img%>" width="100%"/>
+									<%
+									if (edit) {
+									%>
+									<div class="hide" style="position:absolute;right:0; margin-top:-15px;">
+										<button type="button" partsn="<%=parts[i].partsn%>" class="btn btn-default action-remove-part-img"><i class="fa fa-close fa-lg"></i> Remove</button>
+									</div>
+									<%
+									} // end if edit
+									%>
+								</div>
+								<%
+								} // end if
+								%>
+								</td>
+							<%
+							if ((i+1)%col==0 && i!=0) {
+							%>
+								</tr>
+							<%
+							} // end if
+							%>
+							<%
+							} // end for
+							%>
+							
+							</table>
+							<!-- 2 COL END -->
+							
+						</div>
+						
+						</div>
+
+						
+					</li>

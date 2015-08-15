@@ -1,0 +1,1002 @@
+var basePath='/quiz/';
+var timeoutSetting = 70000;
+var jsonData;
+var currentItemsn;
+var currentPartsn;
+var currentPageIndex = 0;
+var limitPhotoSize = 60*1000
+
+$(document).ready(function(){
+	
+	loadJsonData(formid);
+	
+	jQuery.ajaxSetup({
+		beforeSend: function(){
+			displayLoadIndc();
+		},
+		complete: function(){
+			hideLoadIndc();
+		},
+		success: function(){
+		}
+	});
+
+	
+	
+	$(document).on("keyup", "textarea#title-input" , function(e) {
+		   proname = $(this).val();
+		   updateTitle(proname, jsonData);
+		   renderJsonData(jsonData, currentPageIndex);
+		   $('textarea#title-input').val('').val(proname);
+		   $('textarea#title-input').focus();
+	});
+	$(document).on("change", "input#randomized-question-input" , function(e) {
+		if(this.checked) {
+			jsonData.setup.randomizedQuestion = true;
+		} else {
+			jsonData.setup.randomizedQuestion = false;
+		}
+		
+	});
+	$(document).on("click", "input#randomized-answer-input" , function(e) {
+		if(this.checked) {
+			jsonData.setup.randomizedAnswer = true;
+		} else {
+			jsonData.setup.randomizedAnswer = false;
+		}
+	});
+	$(document).on("click", "input#show-answer-input" , function(e) {
+		if(this.checked) {
+			jsonData.setup.showAnswer = true;
+		} else {
+			jsonData.setup.showAnswer = false;
+		}
+	});
+	
+	$(document).on("click", "div#title-edit" , function(e) {
+		activaTab('tab_3')
+	});
+	
+	$(document).on("mouseover", "div#title-edit" , function(e) {
+		$('#title-editbar').removeClass('hide');
+	});
+	$(document).on("mouseout", "div#title-edit" , function(e) {
+		$('#title-editbar').addClass('hide');
+	});
+	
+	$(document).on("mouseover", "li.question" , function(e) {
+		$(this).find('div.question-editbar').removeClass('hide');
+	});
+	$(document).on("mouseout", "li.question" , function(e) {
+		$(this).find('div.question-editbar').addClass('hide');
+	});
+	
+	$(document).on("mouseover", "div.question-box" , function(e) {
+		$(this).addClass('border-dashed')
+	});
+	
+	$(document).on("mouseout", "div.question-box" , function(e) {
+		$(this).removeClass('border-dashed')
+	});
+	
+	$(document).on("click", "button#newPage" , function(e) {
+		var page = createNewPage(jsonData);
+		currentPageIndex = jsonData.pages.length - 1;
+		renderJsonData(jsonData, currentPageIndex)
+		activaTab('tab_1');
+	});
+	
+	$(document).on("click", "span.page" , function(e) {
+		currentPageIndex = parseInt($(this).attr('pageindex'));
+		renderJsonData(jsonData, currentPageIndex)
+		activaTab('tab_1');
+	});
+	
+	$(document).on("click", "button#questionMultiple" , function(e) {
+		var itemType = 'radio';
+		var values = new Array(0);
+		values.push('My Option 1')
+		values.push('My Option 2')
+		values.push('My Option 3')
+		commonQuestionTemplate(jsonData, itemType, values, currentPageIndex)
+	});
+	
+	$(document).on("click", "button#questionCheckbox" , function(e) {
+		var itemType = 'checkbox';
+		var values = new Array(0);
+		values.push('My Option 1')
+		values.push('My Option 2')
+		values.push('My Option 3')
+		commonQuestionTemplate(jsonData, itemType, values, currentPageIndex)
+	});
+	
+	$(document).on("click", "button#questionTrueFalse" , function(e) {
+		var itemType = 'truefalse';
+		var values = new Array(0);
+		values.push('True')
+		values.push('False')
+		commonQuestionTemplate(jsonData, itemType, values, currentPageIndex)
+		
+	});
+	
+	$(document).on("click", "button#questionTextbox" , function(e) {
+		var itemType = 'textbox';
+		var values = new Array(0);
+		values.push('')
+		commonQuestionTemplate(jsonData, itemType, values, currentPageIndex)
+		
+	});
+	
+	$(document).on("click", "button#questionEssay" , function(e) {
+		var itemType = 'textarea';
+		var values = new Array(0);
+		values.push('')
+		commonQuestionTemplate(jsonData, itemType, values, currentPageIndex)
+	});
+	
+	$(document).on("click", "button#questionImageOnly" , function(e) {
+		var itemType = 'imageOnly';
+		var values = new Array(0);
+		commonQuestionTemplate(jsonData, itemType, values, currentPageIndex)
+	});
+	
+	$(document).on("click", "button#questionTextOnly" , function(e) {
+		var itemType = 'textOnly';
+		var values = new Array(0);
+		values.push('Some text here')
+		commonQuestionTemplate(jsonData, itemType, values, currentPageIndex)
+	});
+	
+	$(document).on("click", "div.question-box" , function(e) {
+		activaTab('tab_2');
+		currentItemsn = $(this).closest('li.question').attr('itemsn');
+		renderJsonData(jsonData, currentPageIndex);
+		$('div.question-box').each(function (e){
+			$(this).removeClass('bg-maroon'); 
+		});
+		$(this).addClass('bg-maroon');
+	});
+	
+	$(document).on("click", "button#addNewOption" , function(e) {
+		var itemsn = $(this).attr('itemsn');
+		addPartOption(itemsn, jsonData, currentPageIndex)
+		
+		renderJsonData(jsonData, currentPageIndex);
+	});
+	
+	$(document).on("click", "button.remove-part" , function(e) {
+		var partsn = $(this).attr('partsn');
+		removePart(currentItemsn, partsn, jsonData, currentPageIndex);
+		renderJsonData(jsonData, currentPageIndex);
+	});
+	
+	$(document).on("click", "button.action-remove-item" , function(e) {
+		
+		var itemsn = $(this).attr('itemsn');
+		$('li[itemsn="'+ itemsn +'"').fadeOut('slow');
+		setTimeout(function() {
+			removeItem(itemsn, jsonData, currentPageIndex);
+			renderJsonData(jsonData, currentPageIndex);
+		}, 1000);
+		
+		console.log('action-remove-item=>'+ JSON.stringify(jsonData));
+		activaTab('tab_1');
+	});
+	
+	$(document).on("click", "button.action-remove-page" , function(e) {
+		var pageindex = $(this).attr('pageindex');
+		if (jsonData.pages.length <= 1) {
+			currentPageIndex = 0;
+			alert('The quiz MUST at least one page.');
+		} else {
+			removePage(pageindex, jsonData);
+			currentPageIndex = (pageindex==0)?0:pageindex - 1; 
+		}
+		renderJsonData(jsonData, currentPageIndex);
+		activaTab('tab_1');
+	});
+	
+	$(document).on("click", "button.action-edit-item" , function(e) {
+		activaTab('tab_2')
+		renderJsonData(jsonData, currentPageIndex);
+		$(this).parent('div.question-editbar').prev().addClass('bg-maroon')
+	});
+	
+	$(document).on("click", "button.action-duplicate-item" , function(e) {
+		var itemsn = $(this).closest('li.question').attr('itemsn');
+		duplicateItem(itemsn, jsonData, currentPageIndex);
+		renderJsonData(jsonData, currentPageIndex);
+	});
+	
+	$(document).on("keyup", "input.textarea-row" , function(e) {
+		var itemsn = $(this).closest('div.form-group').attr('itemsn');
+		var row = $(this).val();
+		if (row < 100){
+			updateItemWithRow(itemsn, row, jsonData, currentPageIndex);
+			renderJsonData(jsonData, currentPageIndex);
+		} else {
+			alert('Number MUST be less then 100.');
+			$(this).val('')
+		}
+		var temp = $('input.textarea-row').val();
+		$('input.textarea-row').val(temp).focus();
+	});
+	
+	$(document).on("keyup", "div#question-input" , function(e) {
+
+		   var proname = $(this).html();
+		   currentItemsn = $(this).closest('.form-group').attr('itemsn');
+		   updateItem(currentItemsn, proname, jsonData, currentPageIndex);
+		   renderForm(jsonData, currentPageIndex);
+		   
+	});
+	
+	$(document).on("keyup", "input.part-input, textarea.part-input" , function(e) {
+		   var proname = $(this).val();
+		   currentPartsn = $(this).attr('partsn');
+		   currentItemsn = $(this).closest('.form-group').attr('itemsn');
+		   updatePart(currentItemsn, currentPartsn, proname, jsonData, currentPageIndex);
+		   renderForm(jsonData, currentPageIndex);
+	});
+	
+	$(document).on("click", "button.upload-part-photo" , function(e) {
+	    $(this).next("input.filePartInput").trigger('click');
+	});
+	   
+	$(document).on("change", "input.filePartInput" , function(e) {
+		var partsn = $(this).attr('partsn');
+		var itemsn = $(this).closest('div.form-group').attr('itemsn');
+	    var oFReader = new FileReader();
+	    var file = this.files[0];
+	    var name = file.name;
+		var type = file.type;
+		var size = file.size;
+		if (type != 'image/jpeg'){
+			$('#myModalLabel').html('Error Message');
+			$('#modal-result').html('<div><strong>Only accept photo with JPEG format.</strong></div>')
+			$('#myModal').modal();
+		} else if (size > limitPhotoSize){
+			$('#myModalLabel').html('Error Message');
+			$('#modal-result').html('<div><strong>Only accept photo size less then 60KB..</strong></div>')
+			$('#myModal').modal();
+		} else {
+			oFReader.readAsDataURL(file);
+		    oFReader.onload = function (oFREvent) {
+		    	var imgSrc = oFREvent.target.result;
+		    	updatePartWithImg(itemsn, partsn, imgSrc, jsonData, currentPageIndex);
+		    	renderForm(jsonData, currentPageIndex);
+		    };
+		}
+	});
+	
+	$(document).on("click", "button.uploadItemPhoto" , function(e) {
+	    $(this).next("input.fileItemInput").trigger('click');
+	});
+	   
+	
+	$(document).on("change", "input.fileItemInput" , function(e) {
+		var itemsn = $(this).attr('itemsn');
+	    var oFReader = new FileReader();
+	    var file = this.files[0];
+	    var name = file.name;
+		var type = file.type;
+		var size = file.size;
+		if (type != 'image/jpeg'){
+			$('#myModalLabel').html('Error Message');
+			$('#modal-result').html('<div><strong>Only accept photo with JPEG format.</strong></div>')
+			$('#myModal').modal();
+		} else if (size > limitPhotoSize){
+			$('#myModalLabel').html('Error Message');
+			$('#modal-result').html('<div><strong>Only accept photo size less then 60KB..</strong></div>')
+			$('#myModal').modal();
+		} else {
+			oFReader.readAsDataURL(file);
+		    oFReader.onload = function (oFREvent) {
+		    	var imgSrc = oFREvent.target.result;
+		    	updateItemWithImg(itemsn, imgSrc, jsonData, currentPageIndex);
+		    	renderForm(jsonData, currentPageIndex);
+		    };
+		}
+	});
+	$(document).on("click", "button.action-remove-item-img" , function(e) {
+		var itemsn = $(this).closest('li.question').attr('itemsn');
+		updateItemWithImg(itemsn, '', jsonData, currentPageIndex)
+		renderForm(jsonData, currentPageIndex);
+	});
+	
+	$(document).on("click", "button.action-remove-part-img" , function(e) {
+		var itemsn = $(this).closest('li.question').attr('itemsn');
+		var partsn = $(this).attr('partsn');
+		updatePartWithImg(itemsn, partsn, '', jsonData, currentPageIndex)
+		renderForm(jsonData, currentPageIndex);
+	});
+	
+	$(document).on("mouseover", "div.thumbnail" , function(e) {
+		$(this).find('div').removeClass('hide');
+	});
+	$(document).on("mouseout", "div.thumbnail" , function(e) {
+		$(this).find('div').addClass('hide');
+	});
+	
+	$(document).on("click", "a.action-save" , function(e) {
+		var url = basePath+'sandboxPost';
+		var callbackName = "save";
+		callAjax(jsonData, url, callbackName)
+	});
+	
+	$(document).on("click", "select.optionColumn" , function(e) {
+		var col = $(this).val();
+		var itemsn = $(this).closest('div.form-group').attr('itemsn');
+		updateItemWithCol(itemsn, col, jsonData, currentPageIndex);
+		renderForm(jsonData, currentPageIndex);
+	});
+	
+	$(document).on("click", "span.nav-question" , function(e) {
+		var aid = $(this).attr('itemsn');
+		var aTag = $("li[itemsn='"+ aid +"']");
+		var s = aTag.offset().top - 178
+		
+	    $('html,body').animate({scrollTop: s},'slow');
+	});
+	
+	$(document).on("click", "button#managepoint" , function(e) {
+		$('div#sidebar-div').hide();
+		$('div#form-div').hide();
+		$('div#managepoint-div').show();
+	});
+	
+	$(document).on("click", "button#managepoint-close" , function(e) {
+		$('div#sidebar-div').show();
+		$('div#form-div').show();
+		$('div#managepoint-div').hide();
+	});
+	
+	$(document).on("change", "input.answer-input" , function(e) {
+		var checked = this.checked;
+		var itemsn = $(this).attr('itemsn');
+		var partsn = $(this).attr('partsn');
+		updateItemWithAnswer(itemsn, partsn, checked, jsonData, currentPageIndex);
+		renderJsonData(jsonData, currentPageIndex)
+	});
+	
+	$(document).on("keyup", "input.answer-text-input" , function(e) {
+		var itemsn = $(this).closest('.form-group').attr('itemsn');
+		var partsn = $(this).attr('partsn');
+		var text = $(this).val();
+		updateItemWithAnswerText(itemsn, partsn, text, jsonData, currentPageIndex);
+		renderJsonData(jsonData, currentPageIndex)
+		$('input.answer-text-input').val(text)
+		$('input.answer-text-input').focus();
+	});
+});
+
+function loadJsonData(formid){
+	$.ajax({
+        type: "POST",
+        url: basePath+"loadSandbox",
+        data: formid,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        timeout: timeoutSetting,
+        success: function(data){
+        	if (formid=='new'){
+        		jsonData = initJsonData();
+        		formid = jsonData.formid;
+        	} else {
+        		jsonData = data;
+        	}
+        	console.log('loadJsonData=>'+JSON.stringify(jsonData))
+        	renderJsonData(jsonData, currentPageIndex);
+        	printModified('');
+        },
+        failure: function(errMsg) {
+            alert(errMsg);
+        },
+        error: function (xhr, textStatus, errorThrown){
+        	//openErrorDialog(plsCon);
+        }
+  });
+}
+
+function callAjax (obj, url, callbackName) {
+	var input = JSON.stringify(obj);
+	console.log(input)
+	$.ajax({
+        type: "POST",
+        url: url,
+        data: input,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        timeout: timeoutSetting,
+        success: function(data){
+        	callback(callbackName, data);
+        },
+        failure: function(errMsg) {
+            alert("Falure:"+errMsg);
+        },
+        error: function (xhr, textStatus, errorThrown){
+        	alert("Error:"+textStatus);
+        }
+  });
+}
+
+function callback(name, data) {
+	if (name=='save'){
+		$('#myModalLabel').html('Save');
+		$('#modal-result').html('<div><strong>This quiz was Saved</strong></div>')
+		$('#myModal').modal();
+		printModified('Saved');
+	}
+		
+	
+}
+
+function commonQuestionTemplate(data, itemType, values, pageIndex){
+	var question = 'Question here?';
+	var item = createItem(data, question, itemType, '', pageIndex);
+	item.parts = new Array(0);
+	for (var i = 0; i < values.length; i++) {
+		var part = createPartOptionMultiple(values[i]);
+		item.parts.push(part);
+	}
+
+	currentItemsn = item.itemsn;
+	if (data.pages[pageIndex].items == null){
+		data.pages[pageIndex].items = new Array(0);
+	}
+	data.pages[pageIndex].items.push(item);
+	
+	renderJsonData(data, pageIndex);
+	
+	// scroll to Question
+	var aTag = $("li[itemsn='"+ currentItemsn +"']");
+	var s = aTag.offset().top - 178
+    $('html,body').animate({scrollTop: s},'slow');
+}
+
+function reorderParts(newParts, itemsnThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			var parts = item.parts;
+			for (var j = 0; j < parts.length; j++) {
+				var part = parts[j];
+				for (var k = 0; k < newParts.length; k++) {
+					if (newParts[k].partsn == part.partsn) {
+						newParts[k].img = part.img;
+						newParts[k].value = part.value;
+					}
+				}
+			}
+			item.parts = newParts.slice();
+			break;
+		}
+	}
+}
+
+function reorderItems(newItems, data, pageIndex){
+	data.pages[pageIndex].items = newItems.slice();
+}
+
+function addPartOption(itemsnThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			var parts = item.parts;
+			parts.push(createPartOptionMultiple('My new option'));
+		}
+	}
+}
+
+function removePart(itemsnThis, partsnThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			var parts = item.parts;
+			if (parts.length <= 1){
+				break;
+			}
+			for (var j = 0; j < parts.length; j++) {
+				var part = parts[j];
+				var partsn = part.partsn;
+				if (partsnThis == partsn){
+					parts.splice(j, 1);
+					break;
+				}
+			}
+		}
+	}
+}
+
+function duplicateItem(itemsnThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			var newItem = createItem(data, item.question, item.type, item.img, pageIndex);
+			newItem.parts = new Array(0);
+			var parts = item.parts;
+			for (var j = 0; j < parts.length; j++) {
+				var part = parts[j];
+				var newPart = createPartOptionMultiple(part.value);
+				newPart.img = part.img;
+				newItem.parts.push(newPart);
+			}
+			data.pages[pageIndex].items.splice(i, 0, newItem);
+			break;
+		}
+	}
+}
+
+function removeItem(itemsnThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			data.pages[pageIndex].items.splice(i,1);
+			break;
+		}
+	}
+}
+
+function removePage(pageindexTHis, data){
+	data.pages.splice(pageindexTHis,1);
+}
+
+function  updateTitle(proname, data){
+	data.setup.title = proname;
+}
+
+function updatePart(itemsnThis, partsnThis, valueThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			var parts = item.parts;
+			for (var j = 0; j < parts.length; j++) {
+				var part = parts[j];
+				var partsn = part.partsn;
+				if (partsnThis == partsn){
+					part.value = valueThis;
+					break;
+				}
+			}
+		}
+	}
+}
+
+function updatePartWithImg(itemsnThis, partsnThis, imgThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			var parts = item.parts;
+			for (var j = 0; j < parts.length; j++) {
+				var part = parts[j];
+				var partsn = part.partsn;
+				if (partsnThis == partsn){
+					part.img = imgThis;
+					break;
+				}
+			}
+		}
+	}
+}
+
+function updateItem(itemsnThis, questionThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			item.question = questionThis;
+			break;
+		}
+	}
+}
+
+function updateItemWithImg(itemsnThis, imgThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			items[i].img = imgThis;
+			break;
+		}
+	}
+}
+
+function updateItemWithRow(itemsnThis, rowThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			items[i].row = rowThis;
+			break;
+		}
+	}
+}
+
+function updateItemWithCol(itemsnThis, colThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			item.col = colThis;
+			break;
+		}
+	}
+}
+
+function updateItemWithAnswer(itemsnThis, partsnThis, checkedThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var type= item.type;
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			var parts = item.parts;
+			for (var j = 0; j < parts.length; j++) {
+				var part = parts[j]
+				var partsn = part.partsn;
+				if (partsn == partsnThis){
+					data.pages[pageIndex].items[i].parts[j].ans=checkedThis;
+				} else {
+					if (type == 'radio' || type == 'truefalse') {
+						data.pages[pageIndex].items[i].parts[j].ans=false;
+					}
+				}
+			}
+			
+		}
+	}
+}
+
+function updateItemWithAnswerText(itemsnThis, partsnThis, textThis, data, pageIndex) {
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var type= item.type;
+		var itemsn = item.itemsn;
+		if (itemsnThis == itemsn){
+			var parts = item.parts;
+			for (var j = 0; j < parts.length; j++) {
+				var part = parts[j]
+				var partsn = part.partsn;
+				if (partsn == partsnThis){
+					data.pages[pageIndex].items[i].parts[j].ans=true;
+					data.pages[pageIndex].items[i].parts[j].ansText=textThis;
+				} else {
+					if (type == 'textbox') {
+						data.pages[pageIndex].items[i].parts[j].ans=false;
+						data.pages[pageIndex].items[i].parts[j].ansText='';
+					} 
+				}
+			}
+			
+		}
+	}
+}
+
+
+
+function activaTab(tab){
+    $('.nav-tabs a[href="#' + tab + '"]').tab('show');
+};
+
+function doSortParts(pageIndex){
+    $("#parts").sortable({
+    	handle:'button.move-part',
+    	cancel: '',
+    	update: function(event, ui) {
+    		var newParts = new Array(0);
+			var formGroup = $(this).closest('div.form-group');
+			var itemsn = formGroup.attr('itemsn');
+    		$('li.part').each(function(i) { 
+    			var partsn = $(this).attr('partsn');
+        		
+        		var part = new Object();
+        		part.partsn = partsn;
+        		newParts.push(part);
+    		});
+
+    		reorderParts(newParts, itemsn, jsonData, pageIndex);
+    		renderJsonData(jsonData, pageIndex);
+
+    	}
+    });
+}
+
+function doSortItems(pageIndex){
+    $("#questions").sortable({
+    	handle:'button.action-move-item',
+    	cancel: '',
+    	update: function(event, ui) {
+    		var newItems = new Array(0);
+			
+    		$('li.question').each(function(i) { 
+    			var itemsn = $(this).attr('itemsn');
+    			var item = getItemObject(itemsn, jsonData, pageIndex);
+    			newItems.push(item);
+    		});
+    		reorderItems(newItems, jsonData, pageIndex);
+    		renderJsonData(jsonData, pageIndex);
+
+    	}
+    });
+}
+
+function getItemObject(itemsnThis, data, pageIndex){
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+		if (itemsn == itemsnThis){
+			return item;
+		}
+	}
+	return null;
+}
+
+function printModified(modifiedStatus){
+	$('#modifiedStatus').html(modifiedStatus);
+}
+
+function renderJsonData(data, pageIndex){
+	
+	renderQuestionSetting(data, pageIndex);
+	renderQuizSetting(data, pageIndex);
+	renderForm(data, pageIndex);
+	renderPagination(data, currentPageIndex);
+	renderNavQuestion(data.pages[pageIndex])
+
+	doSortParts(pageIndex);
+	doSortItems(pageIndex);
+	
+	printModified('Modified');
+	
+	$(".nano").nanoScroller();
+	$('[data-toggle="tooltip"]').tooltip()
+}
+
+function renderNavQuestion(page){
+	var items = page.items;
+	if (items){
+		var msg = '';
+		msg += new EJS({url: basePath+'template/nav_questions.ejs'}).render(page);
+		$('#nav-questions').html(msg);
+	} else {
+		$('#nav-questions').html('');
+	}
+}
+
+function renderQuizSetting(data){
+	var msg = '';
+	msg += new EJS({url: basePath+'template/quiz_setting.ejs'}).render(data);
+	$('#tab_3').html(msg);
+}
+
+function renderQuestionSetting(data, pageIndex){
+	
+	$('#tab_2').children().remove();
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; items!=null && i < items.length; i++) {
+		var item = items[i];
+		var itemsn = item.itemsn;
+
+		if (itemsn == currentItemsn){
+			var msg = '';
+			msg += new EJS({url: basePath+'template/question_setting.ejs'}).render(item);
+			$('#tab_2').append(msg);
+			break;
+		}
+	}
+	
+	//var proname;
+	//var requestDelay;
+	/*var editor_id = 'question-input'; // ID no need #
+	if (tinymce.EditorManager.execCommand('mceRemoveEditor',true, editor_id)){
+		//tinymce.EditorManager.execCommand('mceAddEditor',true, editor_id);
+		tinymce.init({
+	        selector: "#question-input",
+	        toolbar:false,
+	        menubar : false,
+	        statusbar : false,
+	        setup: function(ed) {
+	            ed.on('keyup', function(e) {
+
+		      		   proname = ed.getContent()
+		      		   console.log('proname='+proname)
+	      			   updateItem(currentItemsn, proname, data);
+	      			   console.log(JSON.stringify(data))
+	      			   renderJsonData(data);
+	      			   
+	      			   tinymce.execCommand('mceFocus',false,editor_id);
+	      			   
+	            });
+	        }
+	    });
+		
+	}*/
+	
+}
+
+function renderForm(data, pageIndex){
+	
+	$('#questions').children().remove();
+	var title = data.setup.title;
+	$('#title').text(title);
+	
+	var count = 1;
+	var items = data.pages[pageIndex].items;
+	for (var i = 0; items != null && i < items.length; i++) {
+		var item = items[i];
+		item.edit = true;
+		var msg = '';
+		var editbar = new EJS({url: basePath+'template/question-editbar.ejs'}).render(item);
+		if (item.type == 'radio') {
+			item.count = count++;
+			msg += new EJS({url: basePath+'template/question_multiple.ejs'}).render(item);
+		} else if (item.type == 'checkbox') {
+			item.count = count++;
+			msg += new EJS({url: basePath+'template/question_multiple.ejs'}).render(item);
+		} else if (item.type == 'truefalse'){
+			item.count = count++;
+			//msg += new EJS({url: basePath+'template/question_truefalse.ejs'}).render(item);
+			msg += new EJS({url: basePath+'template/question_multiple.ejs'}).render(item);
+		} else if (item.type == 'textbox'){
+			item.count = count++;
+			msg += new EJS({url: basePath+'template/question_textbox.ejs'}).render(item);
+		} else if (item.type == 'textarea'){
+			item.count = count++;
+			msg += new EJS({url: basePath+'template/question_textarea.ejs'}).render(item);
+		} else if (item.type == 'imageOnly'){
+			item.count = null;
+			msg += new EJS({url: basePath+'template/imageOnly.ejs'}).render(item);
+		} else if (item.type == 'textOnly'){
+			item.count = null;
+			msg += new EJS({url: basePath+'template/textOnly.ejs'}).render(item);
+		} 
+		
+		
+		$('#questions').append(msg);
+		$('li[itemsn='+item.itemsn+']').append(editbar)
+	}
+}
+
+function renderPagination(data, currentPageIndex) {
+	
+	var obj = new Object();
+	obj = data;
+	obj.currentPageIndex = currentPageIndex;
+	obj.edit = true;
+	var msg = '';
+	msg += new EJS({url: basePath+'template/page.ejs'}).render(obj);
+	$('#pages').html(msg);
+}
+
+function initJsonData(){
+	var data = new Object();
+	data.formid = uuid();
+	var setup = new Object();
+	setup.formid = data.formid;
+	setup.title = 'MY TITLE';
+	setup.randomizedQuestion = false;
+	setup.randomizedAnswer = false;
+	setup.showAnswer = false;
+	data.setup = setup;
+	
+	data.pages = new Array(0);
+	var page = new Object();
+	page.pagesn = uuid();
+	page.formid = data.formid;
+	data.pages.push(page);
+	data.pages[0].items = new Array(0);
+	return data;
+}
+
+function createNewPage(data){
+	var page = new Object();
+	page.pagesn =  uuid();
+	page.formid = data.formid;
+	data.pages.push(page);
+	
+	return page;
+}
+
+function createItem(data, question, type, img, pageIndex){
+	var item = new Object();
+	item.itemsn = uuid();
+	item.type = type;
+	item.question = question;
+	item.img = img;
+	item.col = 1;
+	//item.pagesn = data.pages[pageIndex].pagesn;
+	if (type == 'textarea') {
+		item.row = 5;
+	}
+	
+	return item;
+}
+
+function createPartOptionMultiple(value){
+	var part = new Object();
+	part.partsn = uuid();
+	part.value = value;
+	part.img = '';
+	part.ans = false;
+	part.ansText = '';
+	
+	return part;
+}
+
+
+
+function syntaxHighlight(json) {
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        var cls = 'number';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+                cls = 'key';
+            } else {
+                cls = 'string';
+            }
+        } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+        } else if (/null/.test(match)) {
+            cls = 'null';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+    });
+}
+
+function hideLoadIndc() {
+	setTimeout(function(){
+		document.getElementById('busy_indicator').style.visibility = 'hidden';
+	}, 200 );
+	
+};
+function displayLoadIndc() {
+	document.getElementById('busy_indicator').style.visibility = 'visible';
+};
+
+
+var uuid = (function () {
+    var a = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split("");
+    return function (b, f) {
+        var h = a,
+            e = [],
+            d = Math.random;
+        f = f || h.length;
+        if (b) {
+            for (var c = 0; c < b; c++) {
+                e[c] = h[0 | d() * f];
+            }
+        } else {
+            var g;
+            e[8] = e[13] = e[18] = e[23] = "-";
+            e[14] = "4";
+            for (var c = 0; c < 36; c++) {
+                if (!e[c]) {
+                    g = 0 | d() * 16;
+                    e[c] = h[(c == 19) ? (g & 3) | 8 : g & 15];
+                }
+            }
+        }
+        return e.join("").toLowerCase();
+    }
+})();

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:tiles="http://www.thymeleaf.org"
+      xmlns="http://www.w3.org/1999/xhtml"
+      lang="en">
+
+<head>
+
+</head>
+<body tiles:fragment="content">
+<script  th:inline="javascript">
+
+var formid = [[${formid}]] 
+
+</script>
+
+
+<div class="container-fixed" style="width: 1300px;margin: 0 auto 0 auto;margin-top: 70px;">
+	<div class="row" style="width:1200px;">
+			<div style="width:100px; position:fixed;">
+					<div class="col-xs-12">
+						<a class="btn btn-app bg-olive action-save pull-right hvr-pulse"><i class="fa fa-floppy-o"></i> Save<span class="badge" id="modifiedStatus"></span></a>
+					</div>
+					<div class="col-xs-12">
+						<a class="btn btn-app action-dashboard bg-purple pull-right hvr-pulse" th:href="@{'/dashboard'}"><i class="fa fa-tachometer"></i> Dashboad</a>
+					</div>
+					<div class="col-xs-12">
+						<a class="btn btn-app action-share bg-orange pull-right hvr-pulse"><i class="fa fa-share-alt"></i> Share</a>
+					</div>
+					<div class="col-xs-12">
+						<a class="btn btn-app bg-maroon action-delete pull-right hvr-pulse"><i class="fa fa-trash-o"></i> Delete</a>
+					</div>
+				</div>
+			<div id="sidebar-div" class="side-bar" style="width:500px; position:fixed;margin-left:100px;">
+			<div class="nav-tabs-custom">
+				
+                <ul class="nav nav-tabs">
+                  <li class="active"><a href="#tab_1" data-toggle="tab">Add a Question</a></li>
+                  <li><a href="#tab_2" data-toggle="tab">Question Settings</a></li>
+                  <li><a href="#tab_3" data-toggle="tab">Quiz Setting</a></li>
+                </ul>
+                <div class="tab-content">
+                  <div class="tab-pane active" id="tab_1" style="right:0;">
+                  	<div class="row margin-top margin-right">
+                  		<div class="col-xs-6"><button type="button" id="newPage" class="btn btn-block btn-default pull-right bg-olive hvr-float-shadow"><i class="fa fa-plus-square"></i> Create a New Page</button></div>
+                  		
+                  	</div>
+                    <div class="row margin-top margin-right">
+                    	<div class="col-xs-6"><button type="button" id="questionMultiple" class="btn btn-block btn-default hvr-sweep-to-right"><i class="fa fa-dot-circle-o"></i> Multiple Choice</button></div>
+                    	<div class="col-xs-6"><button type="button" id="questionCheckbox" class="btn btn-block btn-default hvr-sweep-to-right"><i class="fa fa-check-square-o"></i> Checkbox</button></div>
+                    </div>
+                    <div class="row margin-top margin-right">
+                    	<div class="col-xs-6"><button type="button" id="questionTrueFalse" class="btn btn-block btn-default hvr-sweep-to-right"><i class="fa fa-dot-circle-o"></i> True/False</button></div>
+                    	<div class="col-xs-6"><button type="button" id="questionTextbox" class="btn btn-block btn-default hvr-sweep-to-right"><i class="fa fa-minus-square-o"></i> Fill in the blank</button></div>
+                    </div>
+                    <div class="row margin-top margin-right">
+                    	<div class="col-xs-6"><button type="button" id="questionEssay" class="btn btn-block btn-default hvr-sweep-to-right"><i class="fa fa-pencil"></i> Essay</button></div>
+                    	<div class="col-xs-6"><button type="button" id="questionTextOnly" class="btn btn-block btn-default hvr-sweep-to-right"><i class="fa fa-file-word-o"></i> Text Only</button></div>
+                    </div>
+                    <div class="row margin-top margin-right">
+                    	<div class="col-xs-6"><button type="button" id="questionImageOnly" class="btn btn-block btn-default hvr-sweep-to-right"><i class="fa fa-file-photo-o"></i> Image Only</button></div>
+                    	<div class="col-xs-6"></div>
+                    </div>
+                    <hr style="width: 90%; margin-left:11px;margin-right:11px;"/>
+                    
+                  </div><!-- /.tab-pane -->
+                  <div class="tab-pane" id="tab_2">
+                  	
+				    
+				    
+                  </div><!-- /.tab-pane -->
+                  <div class="tab-pane" id="tab_3">
+                    
+                  </div><!-- /.tab-pane -->
+                </div><!-- /.tab-content -->
+              </div>
+		</div>
+		<div id="form-div" style="width:600px;margin-left:630px;position: relative;">
+			
+			<div id="pages" class="row">
+				
+			</div>
+			<div id="title-edit" style="position: relative;">
+				<div class="hide" id="title-editbar" style="position: absolute;right: 0;word-wrap: break-word;">
+				<button type="button" class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"></i> Edit</button>
+				</div>
+				<h1 id="title">Title here</h1>
+			</div>
+			<div id="nav-questions" class="nano" style="position: fixed;left:1650px; height: 400px;width: 60px;text-align:center;">
+				<!-- NAV QUESTION -->
+			</div>
+			<ol id="questions" class="padding-left-zero list-unstyled">
+		
+
+			</ol>
+			
+		</div>
+		<div id="managepoint-div" style="width:1000px;position: relative;margin: 0 auto 0 auto; height:500px; background-color: red;display:none;">
+			<button id="managepoint-close">Back</button>
+		</div>
+		
+	</div>
+	
+	
+</div>
+
+
+
+<!-- Modal SMALL-->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        <div id="modal-result"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal END -->
+</body>
+</html>
